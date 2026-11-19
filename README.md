@@ -87,6 +87,13 @@
    ```
    生成された APK は `app/build/outputs/apk/debug/app-debug.apk` に出力されます。
 
+### 署名付き Release APK のビルド（R8 有効）
+- [keystore.properties.example](keystore.properties.example) をルート直下に `keystore.properties` としてコピーし、署名キーストア（`.jks`）とパスワードを設定したうえで実行します（いずれも `.gitignore` 対象）。
+  ```bash
+  ./gradlew assembleRelease
+  ```
+- GitHub Actions で自動リリースする場合は、リポジトリの Secrets に `ANDROID_KEYSTORE_BASE64` / `ANDROID_KEYSTORE_PASSWORD` / `ANDROID_KEY_ALIAS` / `ANDROID_KEY_PASSWORD` を登録し、`v*` タグ（例: `v1.0.0`）を Push すると [.github/workflows/release.yml](.github/workflows/release.yml) が起動します。
+
 > **開発ガイドライン**: 1 ソースファイル 300 行以内・Clean Architecture（`data/`・`domain/`・`player/`・`ui/`）で設計されています。詳細は [AGENTS.md](AGENTS.md) および [doc/00_overview.md](doc/00_overview.md) を参照してください。
 
 ---

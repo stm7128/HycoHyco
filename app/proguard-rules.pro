@@ -13,6 +13,8 @@
 -keepclasseswithmembers class * {
     kotlinx.serialization.KSerializer serializer(...);
 }
+-keep,allowobfuscation,allowshrinking @kotlinx.serialization.Serializable class com.github.stm7128.hycohyco.** { *; }
+-keep,allowobfuscation,allowshrinking class com.github.stm7128.hycohyco.data.api.** { *; }
 -keep,allowobfuscation,allowshrinking class com.github.stm7128.hycohyco.data.model.** { *; }
 -keep,allowobfuscation,allowshrinking class com.github.stm7128.hycohyco.data.backup.** { *; }
 

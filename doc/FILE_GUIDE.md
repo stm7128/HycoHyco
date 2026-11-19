@@ -23,9 +23,12 @@
 | `settings.gradle.kts` | プロジェクト名および `:app` モジュール・リポジトリ設定 |
 | `gradle.properties` | Gradle JVM ヒープ・並列実行・Build Cache・Configuration Cache・Kotlin インクリメンタルビルド設定 |
 | `gradle/libs.versions.toml` | Kotlin・Compose BOM・Miuix・Media3・Ktor・Koin・Glance 等のバージョンカタログ |
-| `app/build.gradle.kts` | アプリモジュール設定（`compileSdk=36` / `minSdk=26` / `targetSdk=36`、依存関係、IR 並列コンパイル `-Xbackend-threads=4`、META-INF 除外） |
+| `app/build.gradle.kts` | アプリモジュール設定（`compileSdk=36` / `minSdk=26` / `targetSdk=36`、R8 縮小設定、Release 署名設定、IR 並列コンパイル `-Xbackend-threads=4`、META-INF 除外） |
+| `app/proguard-rules.pro` | R8 縮小・難読化向け keep ルール（Kotlin Serialization / Ktor / Media3 / Koin） |
+| `keystore.properties.example` | ローカル Release 署名用 `keystore.properties` テンプレート |
 | `app/src/main/AndroidManifest.xml` | 権限（通信・MediaPlayback FGS・通知）、`MainActivity`（Deep Link / PiP 設定）、`HycoPlaybackService`、`OfflineDownloadService`、`HycoPlayerWidgetReceiver` 定義 |
 | `.github/workflows/android-ci.yml` | GitHub Actions CI（Temurin JDK 17 での Kotlin 300 行チェック & `:app:assembleDebug` 検証） |
+| `.github/workflows/release.yml` | GitHub Actions Release（`v*` タグ Push 時の署名付き Release APK 自動ビルド & GitHub Releases 公開） |
 
 ---
 

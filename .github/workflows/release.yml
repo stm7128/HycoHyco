@@ -1,0 +1,85 @@
+name: Release APK
+
+on:
+  push:
+    tags:
+      - 'v*'
+  workflow_dispatch:
+    inputs:
+      tag_name:
+        description: 'リリース用タグ名 (例: v1.0.0)'
+        required: true
+        default: 'v1.0.0'
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    name: Build Signed Release APK & Publish
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+
+      - name: Setup Gradle
+        uses: gradle/actions/setup-gradle@v4
+
+      - name: Verify Kotlin 300-line rule
+        run: |
+          python3 - <<'PY'
+          import glob, sys
+          files = sorted(glob.glob('app/src/main/java/**/*.kt', recursive=True))
+          over = [(f, sum(1 for _ in open(f, encoding='utf-8'))) for f in files]
+          over = [(f, n) for f, n in over if n > 300]
+          print(f'Checked {len(files)} Kotlin files, over 300 lines: {len(over)}')
+          for f, n in over:
+              print(f'ERROR: {f} has {n} lines (limit: 300)')
+          sys.exit(1 if over else 0)
+          PY
+
+      - name: Decode Release Keystore
+        env:
+          KEYSTORE_B64: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
+          KS_PASS: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
+          KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
+          KEY_PASS: ${{ secrets.ANDROID_KEY_PASSWORD }}
+        run: |
+          if [ -z "$KEYSTORE_B64" ] || [ -z "$KS_PASS" ] || [ -z "$KEY_ALIAS" ] || [ -z "$KEY_PASS" ]; then
+            echo "ERROR: Missing required signing secrets (ANDROID_KEYSTORE_BASE64 / PASSWORD / KEY_ALIAS / KEY_PASSWORD)."
+            exit 1
+          fi
+          echo "$KEYSTORE_B64" | base64 --decode > "${{ runner.temp }}/release.jks"
+
+      - name: Build Signed Release APK
+        env:
+          ANDROID_KEYSTORE_PATH: ${{ runner.temp }}/release.jks
+          ANDROID_KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
+          ANDROID_KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
+          ANDROID_KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
+        run: ./gradlew :app:assembleRelease -Dorg.gradle.jvmargs="-Xmx3072m -XX:+UseParallelGC -Dfile.encoding=UTF-8"
+
+      - name: Prepare Release Asset
+        id: prep
+        run: |
+          TAG="${{ github.event_name == 'workflow_dispatch' && github.event.inputs.tag_name || github.ref_name }}"
+          OUT_APK="${{ runner.temp }}/HycoHyco-${TAG}.apk"
+          cp app/build/outputs/apk/release/app-release.apk "$OUT_APK"
+          echo "tag=${TAG}" >> "$GITHUB_OUTPUT"
+          echo "apk_path=${OUT_APK}" >> "$GITHUB_OUTPUT"
+
+      - name: Publish GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ steps.prep.outputs.tag }}
+          name: HycoHyco ${{ steps.prep.outputs.tag }}
+          generate_release_notes: true
+          files: |
+            ${{ steps.prep.outputs.apk_path }}
