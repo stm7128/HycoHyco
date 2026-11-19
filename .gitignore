@@ -1,0 +1,31 @@
+# Gradle / Android
+*.iml
+.gradle/
+.kotlin/
+/local.properties
+/.idea/
+.DS_Store
+/build/
+/captures/
+.externalNativeBuild/
+.cxx/
+*.apk
+*.aab
+*.ap_
+*.dex
+
+# App modules build
+app/build/
+app/release/
+app/debug/
+
+# Keystore & Signing
+*.jks
+*.keystore
+keystore.properties
+release-keystore*
+
+# Internal progress / roadmap docs (local only)
+/ROADMAP.md
+/doc/0[1-9]_*.md
+/doc/[1-9][0-9]_*.md

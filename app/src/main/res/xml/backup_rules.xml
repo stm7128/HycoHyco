@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<full-backup-content>
+    <!-- ダウンロードした動画データおよび一時キャッシュはバックアップ対象から除外 -->
+    <exclude domain="file" path="downloads" />
+    <exclude domain="cache" />
+</full-backup-content>

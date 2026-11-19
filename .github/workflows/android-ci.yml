@@ -1,0 +1,41 @@
+name: Android CI
+
+on:
+  push:
+    branches: [ main, master ]
+  pull_request:
+    branches: [ main, master ]
+
+jobs:
+  build:
+    name: Assemble Debug APK & Check Conventions
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+
+      - name: Setup Gradle
+        uses: gradle/actions/setup-gradle@v4
+
+      - name: Verify Kotlin 300-line rule
+        run: |
+          python3 - <<'PY'
+          import glob, sys
+          files = sorted(glob.glob('app/src/main/java/**/*.kt', recursive=True))
+          violations = [(f, sum(1 for _ in open(f, encoding='utf-8'))) for f in files]
+          over = [(f, n) for f, n in violations if n > 300]
+          print(f'Checked {len(files)} Kotlin files, over 300 lines: {len(over)}')
+          for f, n in over:
+              print(f'ERROR: {f} has {n} lines (limit: 300)')
+          sys.exit(1 if over else 0)
+          PY
+
+      - name: Build Debug APK
+        run: ./gradlew :app:assembleDebug -Dorg.gradle.jvmargs="-Xmx3072m -XX:+UseParallelGC -Dfile.encoding=UTF-8"

@@ -1,0 +1,6 @@
+<resources>
+    <string name="app_name">HycoHyco</string>
+    <string name="playback_channel_name">バックグラウンド再生</string>
+    <string name="hyco_player_widget_name">HycoHyco プレイヤー</string>
+    <string name="hyco_player_widget_desc">再生中の動画情報と再生/一時停止・スキップ操作</string>
+</resources>
